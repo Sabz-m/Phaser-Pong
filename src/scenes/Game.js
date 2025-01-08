@@ -9,8 +9,18 @@ export default class Game extends Phaser.Scene {
     ball.body.setCollideWorldBounds(true, 1, 1);
     ball.body.setVelocity(-200, 0);
 
-    const paddleLeft = this.add.rectangle(50, 250, 30, 100, 0xffffff, 1);
-    this.physics.add.existing(paddleLeft, true);
-    this.physics.add.collider(paddleLeft, ball);
+    this.paddleLeft = this.add.rectangle(50, 250, 30, 100, 0xffffff, 1);
+    this.physics.add.existing(this.paddleLeft);
+    this.paddleLeft.body.setImmovable(true);
+    this.physics.add.collider(this.paddleLeft, ball);
+
+    this.cursors = this.input.keyboard.createCursorKeys();
+  }
+  update() {
+    if (this.cursors.up.isDown) {
+      this.paddleLeft.y -= 10;
+    } else if (this.cursors.down.isDown) {
+      this.paddleLeft.y += 10;
+    }
   }
 }
