@@ -1,0 +1,25 @@
+{
+  "name": "phaser-pong",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/Sabz-m/Phaser-Pong#readme",
+  "bugs": {
+    "url": "https://github.com/Sabz-m/Phaser-Pong/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Sabz-m/Phaser-Pong.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "start": "parcel src/index.html -p 8988",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "parcel-bundler": "^1.12.5",
+    "phaser": "^3.87.0"
+  }
+}
