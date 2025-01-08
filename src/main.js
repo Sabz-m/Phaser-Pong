@@ -1,4 +1,4 @@
-import Phaser, { Physics } from "phaser";
+import Phaser from "phaser";
 
 import TitleScreen from "./scenes/TitleScreen";
 import Game from "./scenes/Game";
