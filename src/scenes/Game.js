@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import WebFontFile from "./WebFontFile";
 
 export default class Game extends Phaser.Scene {
   init() {
@@ -7,7 +8,10 @@ export default class Game extends Phaser.Scene {
     this.aiScore = 0;
   }
 
-  preload() {}
+  preload() {
+    const fonts = new WebFontFile(this.load, "Press Start 2P");
+    this.load.addFile(fonts);
+  }
 
   create() {
     // Bounds
@@ -32,7 +36,7 @@ export default class Game extends Phaser.Scene {
     this.physics.add.collider(this.aiPaddle, this.ball);
 
     // Score Tracker
-    const scoreStyle = { fontSize: 50 };
+    const scoreStyle = { fontSize: 50, fontFamily: '"Press Start 2P"' };
     this.playerOneScoreLabel = this.add
       .text(50, 350, "0", scoreStyle)
       .setOrigin(0.5, 0.5);
