@@ -1,8 +1,14 @@
 import Phaser from "phaser";
 
 export default class Game extends Phaser.Scene {
-  aiPaddleVelocity = new Phaser.Math.Vector2(0, 0);
+  init() {
+    this.aiPaddleVelocity = new Phaser.Math.Vector2(0, 0);
+    this.playerOneScore = 0;
+    this.aiScore = 0;
+  }
+
   preload() {}
+
   create() {
     // Bounds
     this.physics.world.setBounds(0, -100, 500, 1000);
@@ -24,6 +30,15 @@ export default class Game extends Phaser.Scene {
     this.physics.add.existing(this.aiPaddle);
     this.aiPaddle.body.setImmovable(true);
     this.physics.add.collider(this.aiPaddle, this.ball);
+
+    // Score Tracker
+    const scoreStyle = { fontSize: 50 };
+    this.playerOneScoreLabel = this.add
+      .text(50, 350, "0", scoreStyle)
+      .setOrigin(0.5, 0.5);
+    this.aiScoreLabel = this.add
+      .text(50, 450, "0", scoreStyle)
+      .setOrigin(0.5, 0.5);
 
     // // Controls
     this.cursors = this.input.keyboard.createCursorKeys();
@@ -60,11 +75,24 @@ export default class Game extends Phaser.Scene {
     }
     this.aiPaddle.x += this.aiPaddleVelocity.x;
     if (this.ball.y < -50) {
+      this.incrementAiScore();
       this.resetBall();
     } else if (this.ball.y > 850) {
+      this.incrementPlayerOneScore();
       this.resetBall();
     }
   }
+
+  incrementPlayerOneScore() {
+    this.playerOneScore += 1;
+    this.playerOneScoreLabel.text = this.playerOneScore;
+  }
+
+  incrementAiScore() {
+    this.aiScore += 1;
+    this.aiScoreLabel.text = this.aiScore;
+  }
+
   resetBall() {
     this.ball.setPosition(250, 400);
     const angle = Phaser.Math.Between(0, 360);
