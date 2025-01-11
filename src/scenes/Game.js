@@ -14,6 +14,9 @@ export default class Game extends Phaser.Scene {
   }
 
   create() {
+    // Background
+    this.scene.run("game-background");
+    this.scene.sendToBack("game-background");
     // Bounds
     this.physics.world.setBounds(0, -100, 500, 1000);
     // ball
