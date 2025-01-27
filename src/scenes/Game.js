@@ -1,11 +1,21 @@
 import Phaser from "phaser";
 import WebFontFile from "./WebFontFile";
+import { GameBackground } from "../const/SceneKeys";
+import * as Colours from "../const/Colours";
+
+const GameState = {
+  Running: "running",
+  PlayerOneWon: "PlayerOneWon",
+  AIWon: "ai-won",
+};
 
 export default class Game extends Phaser.Scene {
   init() {
+    this.gameState = GameState.Running;
     this.aiPaddleVelocity = new Phaser.Math.Vector2(0, 0);
     this.playerOneScore = 0;
     this.aiScore = 0;
+    this.paused = false;
   }
 
   preload() {
@@ -15,25 +25,29 @@ export default class Game extends Phaser.Scene {
 
   create() {
     // Background
-    this.scene.run("game-background");
-    this.scene.sendToBack("game-background");
+    this.scene.run(GameBackground);
+    this.scene.sendToBack(GameBackground);
     // Bounds
     this.physics.world.setBounds(0, -100, 500, 1000);
     // ball
-    this.ball = this.add.circle(250, 400, 10, 0xffffff, 1);
+    this.ball = this.add.circle(250, 400, 10, Colours.white, 1);
     this.physics.add.existing(this.ball);
+    this.ball.body.setCircle(10);
     this.ball.body.setBounce(1, 1);
     this.ball.body.setCollideWorldBounds(true, 1, 1);
-    this.resetBall();
+
+    this.time.delayedCall(1500, () => {
+      this.resetBall();
+    });
 
     // Player One Paddle
-    this.playerOne = this.add.rectangle(250, 750, 100, 30, 0xffffff, 1);
+    this.playerOne = this.add.rectangle(250, 750, 100, 30, Colours.white, 1);
     this.physics.add.existing(this.playerOne);
     this.playerOne.body.setImmovable(true);
     this.physics.add.collider(this.playerOne, this.ball);
 
     // AI Paddle
-    this.aiPaddle = this.add.rectangle(250, 50, 100, 30, 0xffffff, 1);
+    this.aiPaddle = this.add.rectangle(250, 50, 100, 30, Colours.white, 1);
     this.physics.add.existing(this.aiPaddle);
     this.aiPaddle.body.setImmovable(true);
     this.physics.add.collider(this.aiPaddle, this.ball);
@@ -50,8 +64,17 @@ export default class Game extends Phaser.Scene {
     // // Controls
     this.cursors = this.input.keyboard.createCursorKeys();
   }
+
   update() {
-    //Left paddle movement
+    if (this.paused || this.gameState !== GameState.Running) {
+      return;
+    }
+    this.handlePlayerInput();
+    this.updateAI();
+    this.checkscore();
+  }
+
+  handlePlayerInput() {
     if (this.cursors.left.isDown) {
       this.playerOne.x -= 10;
     } else if (this.cursors.right.isDown) {
@@ -62,9 +85,10 @@ export default class Game extends Phaser.Scene {
     } else if (this.playerOne.x > 450) {
       this.playerOne.x = 450;
     }
+  }
 
-    // aiPaddle movement
-    const aiSpeed = 0.1;
+  updateAI() {
+    const aiSpeed = 3;
     const diff = this.ball.x - this.aiPaddle.x;
     if (Math.abs(diff) < 10) {
       return;
@@ -81,12 +105,31 @@ export default class Game extends Phaser.Scene {
       }
     }
     this.aiPaddle.x += this.aiPaddleVelocity.x;
+  }
+
+  checkscore() {
     if (this.ball.y < -50) {
       this.incrementAiScore();
       this.resetBall();
     } else if (this.ball.y > 850) {
       this.incrementPlayerOneScore();
       this.resetBall();
+    }
+
+    const maxScore = 1;
+    if (this.playerOneScore >= maxScore) {
+      console.log("player won");
+      this.gameState = GameState.PlayerOneWon;
+    } else if (this.aiScore >= maxScore) {
+      console.log("AI won");
+      this.gameState = GameState.AIWon;
+    }
+
+    if (!this.gameState === GameState.Running) {
+      this.resetBall();
+    } else {
+      this.ball.active = false;
+      this.physics.world.remove(this.ball.body);
     }
   }
 
