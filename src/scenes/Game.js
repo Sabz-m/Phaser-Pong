@@ -108,10 +108,16 @@ export default class Game extends Phaser.Scene {
   }
 
   checkscore() {
-    if (this.ball.y < -50) {
+    const x = this.ball.x;
+    const playerOneBounds = -50;
+    const AIBounds = 850;
+    if (x >= playerOneBounds && x <= AIBounds) {
+      return;
+    }
+    if (this.ball.y < playerOneBounds) {
       this.incrementAiScore();
       this.resetBall();
-    } else if (this.ball.y > 850) {
+    } else if (this.ball.y > AIBounds) {
       this.incrementPlayerOneScore();
       this.resetBall();
     }
@@ -125,7 +131,7 @@ export default class Game extends Phaser.Scene {
       this.gameState = GameState.AIWon;
     }
 
-    if (!this.gameState === GameState.Running) {
+    if (this.gameState === GameState.Running) {
       this.resetBall();
     } else {
       this.ball.active = false;
