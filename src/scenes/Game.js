@@ -1,11 +1,12 @@
 import Phaser from "phaser";
 import WebFontFile from "./WebFontFile";
-import { GameBackground } from "../const/SceneKeys";
+import { GameBackground, GameOver } from "../const/SceneKeys";
 import * as Colours from "../const/Colours";
+import { PressStart2P } from "../const/Fonts";
 
 const GameState = {
   Running: "running",
-  PlayerOneWon: "PlayerOneWon",
+  BottomPlayerWon: "bottomPlayerWon",
   AIWon: "ai-won",
 };
 
@@ -13,8 +14,8 @@ export default class Game extends Phaser.Scene {
   init() {
     this.gameState = GameState.Running;
     this.aiPaddleVelocity = new Phaser.Math.Vector2(0, 0);
-    this.playerOneScore = 0;
-    this.aiScore = 0;
+    this.bottomPlayerScore = 0;
+    this.topPlayerScore = 0;
     this.paused = false;
   }
 
@@ -41,10 +42,10 @@ export default class Game extends Phaser.Scene {
     });
 
     // Player One Paddle
-    this.playerOne = this.add.rectangle(250, 750, 100, 30, Colours.white, 1);
-    this.physics.add.existing(this.playerOne);
-    this.playerOne.body.setImmovable(true);
-    this.physics.add.collider(this.playerOne, this.ball);
+    this.bottomPlayer = this.add.rectangle(250, 750, 100, 30, Colours.white, 1);
+    this.physics.add.existing(this.bottomPlayer);
+    this.bottomPlayer.body.setImmovable(true);
+    this.physics.add.collider(this.bottomPlayer, this.ball);
 
     // AI Paddle
     this.aiPaddle = this.add.rectangle(250, 50, 100, 30, Colours.white, 1);
@@ -53,11 +54,11 @@ export default class Game extends Phaser.Scene {
     this.physics.add.collider(this.aiPaddle, this.ball);
 
     // Score Tracker
-    const scoreStyle = { fontSize: 50, fontFamily: '"Press Start 2P"' };
-    this.playerOneScoreLabel = this.add
+    const scoreStyle = { fontSize: 50, fontFamily: PressStart2P };
+    this.bottomPlayerScoreLabel = this.add
       .text(50, 350, "0", scoreStyle)
       .setOrigin(0.5, 0.5);
-    this.aiScoreLabel = this.add
+    this.topPlayerScoreLabel = this.add
       .text(50, 450, "0", scoreStyle)
       .setOrigin(0.5, 0.5);
 
@@ -76,14 +77,14 @@ export default class Game extends Phaser.Scene {
 
   handlePlayerInput() {
     if (this.cursors.left.isDown) {
-      this.playerOne.x -= 10;
+      this.bottomPlayer.x -= 10;
     } else if (this.cursors.right.isDown) {
-      this.playerOne.x += 10;
+      this.bottomPlayer.x += 10;
     }
-    if (this.playerOne.x < 50) {
-      this.playerOne.x = 50;
-    } else if (this.playerOne.x > 450) {
-      this.playerOne.x = 450;
+    if (this.bottomPlayer.x < 50) {
+      this.bottomPlayer.x = 50;
+    } else if (this.bottomPlayer.x > 450) {
+      this.bottomPlayer.x = 450;
     }
   }
 
@@ -108,27 +109,26 @@ export default class Game extends Phaser.Scene {
   }
 
   checkscore() {
-    const x = this.ball.x;
-    const playerOneBounds = -50;
-    const AIBounds = 850;
-    if (x >= playerOneBounds && x <= AIBounds) {
+    const y = this.ball.y;
+    console.log(y);
+    const bottomPlayerBounds = 850;
+    const topPlayerBounds = -50;
+    if (y <= bottomPlayerBounds && y >= topPlayerBounds) {
       return;
     }
-    if (this.ball.y < playerOneBounds) {
-      this.incrementAiScore();
-      this.resetBall();
-    } else if (this.ball.y > AIBounds) {
-      this.incrementPlayerOneScore();
-      this.resetBall();
+    if (this.ball.y > bottomPlayerBounds) {
+      this.incrementTopPlayerScore();
+    } else if (this.ball.y < topPlayerBounds) {
+      this.incrementBottomPlayerScore();
     }
 
-    const maxScore = 1;
-    if (this.playerOneScore >= maxScore) {
+    const maxScore = 2;
+    if (this.bottomPlayerScore >= maxScore) {
       console.log("player won");
-      this.gameState = GameState.PlayerOneWon;
-    } else if (this.aiScore >= maxScore) {
+      this.gameState = GameState.BottomPlayerWon;
+    } else if (this.topPlayerScore >= maxScore) {
       console.log("AI won");
-      this.gameState = GameState.AIWon;
+      this.gameState = GameState.TopPlayerWon;
     }
 
     if (this.gameState === GameState.Running) {
@@ -136,23 +136,30 @@ export default class Game extends Phaser.Scene {
     } else {
       this.ball.active = false;
       this.physics.world.remove(this.ball.body);
+
+      this.scene.stop(GameBackground);
+
+      this.scene.start(GameOver, {
+        playerScore: this.bottomPlayerScore,
+        aiScore: this.topPlayerScore,
+      });
     }
   }
 
-  incrementPlayerOneScore() {
-    this.playerOneScore += 1;
-    this.playerOneScoreLabel.text = this.playerOneScore;
+  incrementBottomPlayerScore() {
+    this.bottomPlayerScore += 1;
+    this.bottomPlayerScoreLabel.text = this.bottomPlayerScore;
   }
 
-  incrementAiScore() {
-    this.aiScore += 1;
-    this.aiScoreLabel.text = this.aiScore;
+  incrementTopPlayerScore() {
+    this.topPlayerScore += 1;
+    this.topPlayerScoreLabel.text = this.topPlayerScore;
   }
 
   resetBall() {
     this.ball.setPosition(250, 400);
     const angle = Phaser.Math.Between(0, 360);
-    const vec = this.physics.velocityFromAngle(angle, 400);
+    const vec = this.physics.velocityFromAngle(angle, 600);
     this.ball.body.setVelocity(vec.y, vec.x);
   }
 }

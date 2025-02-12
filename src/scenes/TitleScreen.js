@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import WebFontFile from "./WebFontFile";
 import { Game } from "../const/SceneKeys";
+import { PressStart2P } from "../const/Fonts";
 
 export default class TitleScreen extends Phaser.Scene {
   preload() {
@@ -11,14 +12,14 @@ export default class TitleScreen extends Phaser.Scene {
   create() {
     const title = this.add.text(250, 250, "Sabiri's Pong", {
       fontSize: 30,
-      fontFamily: '"Press Start 2P"',
+      fontFamily: PressStart2P,
     });
     title.setOrigin(0.5, 0.5);
 
     this.add
       .text(250, 350, "Press Space to Start", {
         fontSize: 15,
-        fontFamily: '"Press Start 2P"',
+        fontFamily: PressStart2P,
       })
       .setOrigin(0.5);
 
